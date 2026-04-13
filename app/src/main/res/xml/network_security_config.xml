@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- All traffic must use HTTPS; no cleartext HTTP allowed in release builds -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Open Food Facts uses HTTPS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">world.openfoodfacts.org</domain>
+    </domain-config>
+
+    <!-- USDA FoodData Central uses HTTPS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.nal.usda.gov</domain>
+    </domain-config>
+
+    <!-- Edamam uses HTTPS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.edamam.com</domain>
+    </domain-config>
+
+    <!-- Nutritionix uses HTTPS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">trackapi.nutritionix.com</domain>
+    </domain-config>
+</network-security-config>

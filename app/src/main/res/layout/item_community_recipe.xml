@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 🍽️ COMMUNITY RECIPE CARD - INDIVIDUAL RECIPE DISPLAY -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 📝 RECIPE HEADER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <!-- 📝 RECIPE TITLE AND AUTHOR -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/recipeNameText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🥗 Mediterranean Chickpea Bowl"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/authorNameText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="by HealthyEater23"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+
+            <!-- ⭐ FAVORITE AND SHARE BUTTONS -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/favoriteButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_favorite_border"
+                    android:contentDescription="Save to favorites"
+                    android:layout_marginEnd="8dp" />
+
+                <ImageButton
+                    android:id="@+id/shareButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_share"
+                    android:contentDescription="Share recipe" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 📝 RECIPE DESCRIPTION -->
+        <TextView
+            android:id="@+id/descriptionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Protein-packed Mediterranean bowl perfect for lunch or dinner. Fresh, flavorful, and nutritious!"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 📊 NUTRITION SUMMARY -->
+        <TextView
+            android:id="@+id/nutritionSummaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔥 425 cal • 💪 22g protein • ⏰ 25 min"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:background="@color/surface_secondary"
+            android:padding="8dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ⭐ RATING AND METADATA ROW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- ⭐ RATING STARS -->
+            <RatingBar
+                android:id="@+id/ratingBar"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:rating="4.2"
+                android:isIndicator="true"
+                android:layout_marginEnd="8dp" />
+
+            <!-- 📊 REVIEW COUNT -->
+            <TextView
+                android:id="@+id/reviewCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(24 reviews)"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginEnd="16dp" />
+
+            <!-- 🏷️ CATEGORY TAG -->
+            <TextView
+                android:id="@+id/categoryTagText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏷️ Lunch"
+                android:textSize="12sp"
+                android:textColor="@color/accent_blue"
+                android:background="@drawable/tag_background"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <!-- ⏰ COOK TIME -->
+            <TextView
+                android:id="@+id/cookTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏰ 25 min"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginEnd="8dp" />
+
+            <!-- 🎯 DIFFICULTY -->
+            <TextView
+                android:id="@+id/difficultyText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎯 Easy"
+                android:textSize="12sp"
+                android:textColor="@color/success_green" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/rounded_background"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Loading Title -->
+    <TextView
+        android:id="@+id/tvLoadingTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/loading_default"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_green"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Loading Spinner -->
+    <ProgressBar
+        android:id="@+id/pbLoadingSpinner"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"
+        android:indeterminateTint="@color/primary_green" />
+
+    <!-- Loading Message -->
+    <TextView
+        android:id="@+id/tvLoadingMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/loading_please_wait"
+        android:textSize="16sp"
+        android:textColor="@color/dark_gray"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Progress Bar (hidden by default) -->
+    <ProgressBar
+        android:id="@+id/pbLoadingProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        android:progressTint="@color/primary_green"
+        android:progressBackgroundTint="@color/light_gray" />
+
+    <!-- Progress Percentage (hidden by default) -->
+    <TextView
+        android:id="@+id/tvLoadingPercentage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0%"
+        android:textSize="14sp"
+        android:textColor="@color/medium_gray"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</LinearLayout>

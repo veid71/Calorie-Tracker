@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Include user's nutrition data and preferences -->
+    <include domain="database" />
+    <include domain="sharedpref" />
+    
+    <!-- Exclude sensitive data -->
+    <exclude domain="database" path="temp_files" />
+</full-backup-content>

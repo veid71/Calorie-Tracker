@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- This allows automatic backup to Google Drive for users who have it enabled -->
+        <include domain="database" />
+        <include domain="sharedpref" />
+    </cloud-backup>
+    <device-transfer>
+        <!-- This allows transferring app data when switching to a new device -->
+        <include domain="database" />
+        <include domain="sharedpref" />
+    </device-transfer>
+</data-extraction-rules>

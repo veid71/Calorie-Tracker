@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Calorie Tracker</string>
+    <string name="manual_entry">Add Food</string>
+    <string name="scan_barcode">Scan</string>
+    <string name="view_history">History</string>
+    <string name="daily_goal">Daily Goal</string>
+    <string name="calories_consumed">Calories Consumed</string>
+    <string name="calories_remaining">Calories Remaining</string>
+    <string name="food_name">Food Name</string>
+    <string name="calories">Calories</string>
+    <string name="add_food">Add Food</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="scan_result">Scan Result</string>
+    <string name="food_not_found">Food not found in database</string>
+    <string name="manual_entry_title">Add Food Manually</string>
+    <string name="today">Today</string>
+    <string name="this_week">This Week</string>
+    <string name="settings">Settings</string>
+    <string name="daily_calorie_goal">Daily Calorie Goal</string>
+    <string name="update_database">Update Database</string>
+    <string name="last_updated">Last Updated</string>
+    <string name="protein">Protein (g)</string>
+    <string name="carbs">Carbs (g)</string>
+    <string name="fat">Fat (g)</string>
+    <string name="fiber">Fiber (g)</string>
+    <string name="sugar">Sugar (g)</string>
+    <string name="sodium">Sodium (mg)</string>
+    
+    <!-- Loading dialog strings -->
+    <string name="loading_default">Loading...</string>
+    <string name="loading_please_wait">Please wait...</string>
+    <string name="loading_percentage_format">%d%%</string>
+    
+    <!-- QR Share dialog strings -->
+    <string name="share_recipe_title">Share Recipe</string>
+    <string name="share_via_qr">Share via QR Code</string>
+    <string name="share_via_text">Share via Text</string>
+    <string name="share_recipe_link">Share Recipe Link</string>
+    <string name="close">Close</string>
+    
+    <!-- Workout info strings -->
+    <string name="workout_info_description">Workout calorie explanation</string>
+    <string name="workout_explanation_title">Workout Calorie Explanation</string>
+    <string name="workout_explanation_message">🏃‍♂️ <b>Why are the numbers different from your fitness app?</b>\n\n📱 <b>Your Fitness App Shows:</b> Total calories burned during workout\n\n🍎 <b>CalorieTracker Shows:</b> 70% of those calories as bonus\n\n❓ <b>Why only 70%?</b>\nResearch shows that eating back 100% of workout calories can prevent weight loss. CalorieTracker uses 70% to:\n\n• Account for estimation errors in fitness trackers\n• Maintain a healthy calorie deficit\n• Support sustainable weight management\n\n💡 <b>Example:</b>\n• Fitness app: 1425 calories burned\n• CalorieTracker bonus: 997 calories (70%)\n• Added to your daily goal for healthy fuel!</string>
+    <string name="got_it">Got it!</string>
+</resources>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="140dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/surface_elevated">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Food Name -->
+        <TextView
+            android:id="@+id/tvFoodName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Coca Cola"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <!-- Brand -->
+        <TextView
+            android:id="@+id/tvBrand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Coca-Cola Company"
+            android:textSize="10sp"
+            android:textColor="@color/text_secondary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="2dp" />
+
+        <!-- Bottom row with calories, times scanned, and last scanned -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <!-- Calories -->
+            <TextView
+                android:id="@+id/tvCalories"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="140 cal"
+                android:textSize="10sp"
+                android:textColor="@color/primary_green"
+                android:textStyle="bold" />
+
+            <!-- Times scanned (if > 1) -->
+            <TextView
+                android:id="@+id/tvTimesScanned"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3x"
+                android:textSize="9sp"
+                android:textColor="@color/accent_orange"
+                android:textStyle="bold"
+                android:background="@drawable/rounded_background"
+                android:padding="2dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Last scanned time -->
+        <TextView
+            android:id="@+id/tvLastScanned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2h ago"
+            android:textSize="9sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="2dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

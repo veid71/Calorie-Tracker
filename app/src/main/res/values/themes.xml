@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Modern CalorieTracker Theme with Material Design 3 -->
+    <style name="Theme.CalorieTracker" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary Brand Colors -->
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/dark_green</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/accent_blue</item>
+        <item name="colorSecondaryVariant">@color/accent_purple</item>
+        <item name="colorOnSecondary">@color/text_on_primary</item>
+        
+        <!-- Surface Colors for Modern Look -->
+        <item name="colorSurface">@color/surface_primary</item>
+        <item name="colorOnSurface">@color/text_on_surface</item>
+        <item name="android:colorBackground">@color/surface_secondary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        
+        <!-- Status Bar and Navigation -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/primary_green</item>
+        <item name="android:navigationBarColor" tools:targetApi="l">@color/surface_primary</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o">true</item>
+        
+        <!-- Enhanced Typography -->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.CalorieTracker.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.CalorieTracker.Headline2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.CalorieTracker.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.CalorieTracker.Body2</item>
+        
+        <!-- Modern Button Styles -->
+        <item name="materialButtonStyle">@style/Widget.CalorieTracker.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.CalorieTracker.Button.Outlined</item>
+        
+        <!-- Card and Surface Styles -->
+        <item name="materialCardViewStyle">@style/Widget.CalorieTracker.CardView</item>
+    </style>
+    
+    <!-- Custom Typography Styles -->
+    <style name="TextAppearance.CalorieTracker.Headline1" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+    
+    <style name="TextAppearance.CalorieTracker.Headline2" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+    
+    <style name="TextAppearance.CalorieTracker.Body1" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    
+    <style name="TextAppearance.CalorieTracker.Body2" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    
+    <!-- Modern Button Styles -->
+    <style name="Widget.CalorieTracker.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">16dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="iconSize">24dp</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+    
+    <style name="Widget.CalorieTracker.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">16dp</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="iconSize">24dp</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+    
+    <!-- Enhanced Card Style -->
+    <style name="Widget.CalorieTracker.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">8dp</item>
+        <item name="cardBackgroundColor">@color/surface_elevated</item>
+        <item name="android:elevation">12dp</item>
+    </style>
+</resources>

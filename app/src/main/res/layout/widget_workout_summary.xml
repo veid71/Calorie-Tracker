@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/card_elevated"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <!-- Workout Data Container -->
+    <LinearLayout
+        android:id="@+id/containerWorkout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvWorkoutTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🏃 Today's Workout Bonus"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvCalorieAdjustment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+250 calories"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/success_green"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvWorkoutDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Active calories burned: 350\nExercise time: 45 minutes\nActivity: Running\nDaily goal adjusted: 2000 → 2250 calories"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tvLastSync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Last sync: 15m ago"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="View Details"
+            android:textSize="12sp"
+            style="@style/Widget.Material3.Button.TextButton"
+            app:icon="@drawable/ic_analytics"
+            app:iconSize="16dp" />
+
+    </LinearLayout>
+
+    <!-- No Workout Data Container -->
+    <LinearLayout
+        android:id="@+id/containerNoWorkout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⌚ Workout Sync"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvNoWorkoutMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No workout data found for today.\n\nTo see workout bonuses:\n• Sync your fitness tracker with Health Connect\n• Tap here to verify Health Connect setup\n• Make sure to grant all required permissions"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

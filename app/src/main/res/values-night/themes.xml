@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Dark Mode CalorieTracker Theme -->
+    <style name="Theme.CalorieTracker" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary Brand Colors - Dark Mode -->
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/dark_green</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        
+        <!-- Secondary Colors - Dark Mode -->
+        <item name="colorSecondary">@color/accent_blue</item>
+        <item name="colorSecondaryVariant">@color/accent_purple</item>
+        <item name="colorOnSecondary">@color/text_on_primary</item>
+        
+        <!-- Surface Colors for Dark Theme -->
+        <item name="colorSurface">@color/surface_primary</item>
+        <item name="colorOnSurface">@color/text_on_surface</item>
+        <item name="android:colorBackground">@color/surface_secondary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        
+        <!-- Status Bar and Navigation - Dark Mode -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/surface_primary</item>
+        <item name="android:navigationBarColor" tools:targetApi="l">@color/surface_primary</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o">false</item>
+        
+        <!-- Enhanced Typography - Dark Mode -->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.CalorieTracker.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.CalorieTracker.Headline2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.CalorieTracker.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.CalorieTracker.Body2</item>
+        
+        <!-- Modern Button Styles -->
+        <item name="materialButtonStyle">@style/Widget.CalorieTracker.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.CalorieTracker.Button.Outlined</item>
+        
+        <!-- Card and Surface Styles - Dark Mode -->
+        <item name="materialCardViewStyle">@style/Widget.CalorieTracker.CardView</item>
+    </style>
+    
+    <!-- Enhanced Card Style - Dark Mode -->
+    <style name="Widget.CalorieTracker.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">8dp</item>
+        <item name="cardBackgroundColor">@color/surface_elevated</item>
+        <item name="android:elevation">12dp</item>
+    </style>
+</resources>
