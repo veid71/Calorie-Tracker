@@ -15,6 +15,7 @@ Output:
     output/database_version.json  - Version metadata for the app to check
 """
 
+import argparse
 import gzip
 import json
 import os
@@ -189,10 +190,19 @@ def create_indexes(conn: sqlite3.Connection):
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
+    parser = argparse.ArgumentParser(description="Build OFFs pre-built database")
+    parser.add_argument(
+        "--input", metavar="FILE",
+        help="Path to a pre-downloaded en.openfoodfacts.org.products.jsonl.gz file. "
+             "If omitted the script streams the file directly from Open Food Facts.",
+    )
+    args = parser.parse_args()
+
     OUTPUT_DIR.mkdir(exist_ok=True)
 
+    source = args.input if args.input else OFFS_EXPORT_URL
     print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Building OFFs database")
-    print(f"Source : {OFFS_EXPORT_URL}")
+    print(f"Source : {source}")
     print(f"Output : {DB_GZ_FILE}\n")
 
     conn = init_db(DB_FILE)
@@ -209,38 +219,52 @@ def main():
             total_inserted += len(batch)
             batch.clear()
 
-    # Stream-download → decompress → parse → insert (never writes full uncompressed file)
-    print("Streaming download from Open Food Facts...")
-    # timeout=(connect_s, read_s): no read timeout — the OFFs export is several GB and can
-    # take hours; a fixed read timeout would kill the stream mid-download.
-    # decode_content=False: tell urllib3 NOT to decompress Content-Encoding automatically
-    # so that gzip.open receives the raw compressed bytes it expects.
-    with requests.get(OFFS_EXPORT_URL, stream=True, timeout=(60, None)) as resp:
-        resp.raise_for_status()
-        resp.raw.decode_content = False   # prevent double-decompression
-        with gzip.open(resp.raw, mode="rt", encoding="utf-8", errors="replace") as f:
-            for raw_line in f:
-                raw_line = raw_line.strip()
-                if not raw_line:
-                    continue
-                total_scanned += 1
-                try:
-                    row = extract_product(json.loads(raw_line))
-                    if row:
-                        batch.append(row)
-                        if len(batch) >= BATCH_SIZE:
-                            flush()
-                except (json.JSONDecodeError, Exception):
-                    pass
+    def process_stream(f):
+        nonlocal total_scanned
+        for raw_line in f:
+            raw_line = raw_line.strip()
+            if not raw_line:
+                continue
+            total_scanned += 1
+            try:
+                row = extract_product(json.loads(raw_line))
+                if row:
+                    batch.append(row)
+                    if len(batch) >= BATCH_SIZE:
+                        flush()
+            except (json.JSONDecodeError, Exception):
+                pass
 
-                if total_scanned % LOG_INTERVAL == 0:
-                    elapsed = time.time() - t0
-                    rate = total_scanned / elapsed
-                    print(
-                        f"  Scanned {total_scanned:>8,}  |  "
-                        f"Inserted {total_inserted:>7,}  |  "
-                        f"{rate:,.0f} lines/s"
-                    )
+            if total_scanned % LOG_INTERVAL == 0:
+                elapsed = time.time() - t0
+                rate = total_scanned / elapsed
+                print(
+                    f"  Scanned {total_scanned:>8,}  |  "
+                    f"Inserted {total_inserted:>7,}  |  "
+                    f"{rate:,.0f} lines/s"
+                )
+
+    if args.input:
+        # Process a pre-downloaded local .gz file
+        input_path = Path(args.input)
+        if not input_path.exists():
+            print(f"ERROR: --input file not found: {input_path}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Processing local file: {input_path} ({input_path.stat().st_size / 1024 / 1024:.1f} MB)")
+        with gzip.open(input_path, mode="rt", encoding="utf-8", errors="replace") as f:
+            process_stream(f)
+    else:
+        # Stream-download → decompress → parse → insert (never writes full uncompressed file)
+        print("Streaming download from Open Food Facts...")
+        # timeout=(connect_s, read_s): no read timeout — the OFFs export is several GB and can
+        # take hours; a fixed read timeout would kill the stream mid-download.
+        # decode_content=False: tell urllib3 NOT to decompress Content-Encoding automatically
+        # so that gzip.open receives the raw compressed bytes it expects.
+        with requests.get(OFFS_EXPORT_URL, stream=True, timeout=(60, None)) as resp:
+            resp.raise_for_status()
+            resp.raw.decode_content = False   # prevent double-decompression
+            with gzip.open(resp.raw, mode="rt", encoding="utf-8", errors="replace") as f:
+                process_stream(f)
 
     flush()
     create_indexes(conn)

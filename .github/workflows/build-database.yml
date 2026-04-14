@@ -37,13 +37,44 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
-      # ── Disk space check before build ─────────────────────────────────────
-      - name: Check disk space before build
-        run: df -h
+      # ── Download OFFs export ──────────────────────────────────────────────
+      # Open Food Facts blocks many cloud-provider IPs on their primary server.
+      # We use wget with an attribution User-Agent (as recommended by OFFs for
+      # bulk access) and fall back to the static CDN URL if the primary fails.
+      - name: Download Open Food Facts export
+        run: |
+          mkdir -p output
+          PRIMARY_URL="https://world.openfoodfacts.org/data/en.openfoodfacts.org.products.jsonl.gz"
+          FALLBACK_URL="https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.jsonl.gz"
+          UA="CalorieTracker-DatabaseBuilder/1.0 (https://github.com/${{ github.repository }}; Android nutrition app; monthly CI build)"
+
+          echo "Trying primary URL..."
+          if wget --user-agent="$UA" \
+                  --retry-connrefused \
+                  --waitretry=30 \
+                  --tries=3 \
+                  --timeout=120 \
+                  -O output/openfoodfacts.jsonl.gz \
+                  "$PRIMARY_URL"; then
+            echo "Downloaded from primary URL"
+          else
+            echo "Primary failed, trying fallback URL..."
+            wget --user-agent="$UA" \
+                 --retry-connrefused \
+                 --waitretry=30 \
+                 --tries=3 \
+                 --timeout=120 \
+                 -O output/openfoodfacts.jsonl.gz \
+                 "$FALLBACK_URL"
+            echo "Downloaded from fallback URL"
+          fi
+
+          ls -lh output/openfoodfacts.jsonl.gz
+          df -h
 
       # ── Build ─────────────────────────────────────────────────────────────
       - name: Build database
-        run: python scripts/build_database.py
+        run: python scripts/build_database.py --input output/openfoodfacts.jsonl.gz
 
       # ── Read metadata ─────────────────────────────────────────────────────
       - name: Read build metadata
