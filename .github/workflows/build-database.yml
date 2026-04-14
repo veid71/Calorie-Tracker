@@ -44,8 +44,8 @@ jobs:
       - name: Download Open Food Facts export
         run: |
           mkdir -p output
-          PRIMARY_URL="https://world.openfoodfacts.org/data/en.openfoodfacts.org.products.jsonl.gz"
-          FALLBACK_URL="https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.jsonl.gz"
+          PRIMARY_URL="https://static.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz"
+          FALLBACK_URL="https://world.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz"
           UA="CalorieTracker-DatabaseBuilder/1.0 (https://github.com/${{ github.repository }}; Android nutrition app; monthly CI build)"
 
           echo "Trying primary URL..."

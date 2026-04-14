@@ -28,7 +28,7 @@ from pathlib import Path
 import requests
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-OFFS_EXPORT_URL = "https://world.openfoodfacts.org/data/en.openfoodfacts.org.products.jsonl.gz"
+OFFS_EXPORT_URL = "https://static.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz"
 OUTPUT_DIR = Path("output")
 DB_FILE = OUTPUT_DIR / "openfoodfacts.db"
 DB_GZ_FILE = OUTPUT_DIR / "openfoodfacts.db.gz"
