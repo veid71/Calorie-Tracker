@@ -127,15 +127,31 @@ def extract_product(product: dict):
         return None
 
     nutriments = product.get("nutriments") or {}
+    serving_qty = _float(product.get("serving_quantity"))
 
-    # Must have at least calorie data
-    energy_kcal = _float(
-        nutriments.get("energy-kcal_100g")
-        or nutriments.get("energy-kcal")
-        or nutriments.get("energy_100g")
+    # ── Calories per 100g ────────────────────────────────────────────────────────
+    # Prefer explicit _100g fields.  The bare "energy-kcal" key is ambiguous in OFFs
+    # exports — contributors sometimes store a per-serving value there — so we avoid
+    # it as a direct fallback.  Instead, if only a per-serving value exists and we
+    # know the serving size in grams, we back-calculate the per-100g figure.
+    energy_kcal = (
+        _float(nutriments.get("energy-kcal_100g"))
+        or _float(nutriments.get("energy_100g"))
     )
     if energy_kcal is None:
+        kcal_serving = _float(nutriments.get("energy-kcal_serving"))
+        if kcal_serving is not None and serving_qty and serving_qty > 0:
+            energy_kcal = kcal_serving / (serving_qty / 100.0)
+
+    if energy_kcal is None:
         return None
+
+    # ── Energy in kJ per 100g (same logic) ──────────────────────────────────────
+    energy_kj = _float(nutriments.get("energy-kj_100g"))
+    if energy_kj is None:
+        kj_serving = _float(nutriments.get("energy-kj_serving"))
+        if kj_serving is not None and serving_qty and serving_qty > 0:
+            energy_kj = kj_serving / (serving_qty / 100.0)
 
     now_ms = int(time.time() * 1000)
 
@@ -150,8 +166,8 @@ def extract_product(product: dict):
         _str(product.get("ingredients_text")),
         _str(product.get("allergens")),
         _str(product.get("serving_size")),
-        _float(product.get("serving_quantity")),
-        _float(nutriments.get("energy-kj_100g") or nutriments.get("energy-kj")),
+        serving_qty,
+        energy_kj,
         energy_kcal,
         _float(nutriments.get("fat_100g")),
         _float(nutriments.get("saturated-fat_100g")),
