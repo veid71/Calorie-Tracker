@@ -211,8 +211,13 @@ def main():
 
     # Stream-download → decompress → parse → insert (never writes full uncompressed file)
     print("Streaming download from Open Food Facts...")
-    with requests.get(OFFS_EXPORT_URL, stream=True, timeout=600) as resp:
+    # timeout=(connect_s, read_s): no read timeout — the OFFs export is several GB and can
+    # take hours; a fixed read timeout would kill the stream mid-download.
+    # decode_content=False: tell urllib3 NOT to decompress Content-Encoding automatically
+    # so that gzip.open receives the raw compressed bytes it expects.
+    with requests.get(OFFS_EXPORT_URL, stream=True, timeout=(60, None)) as resp:
         resp.raise_for_status()
+        resp.raw.decode_content = False   # prevent double-decompression
         with gzip.open(resp.raw, mode="rt", encoding="utf-8", errors="replace") as f:
             for raw_line in f:
                 raw_line = raw_line.strip()

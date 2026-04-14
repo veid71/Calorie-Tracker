@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
+      # ── Disk space check before build ─────────────────────────────────────
+      - name: Check disk space before build
+        run: df -h
+
       # ── Build ─────────────────────────────────────────────────────────────
       - name: Build database
         run: python scripts/build_database.py
