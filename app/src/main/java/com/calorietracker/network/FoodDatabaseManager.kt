@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.GZIPInputStream
@@ -1419,7 +1417,8 @@ class FoodDatabaseManager(
     /** Metadata returned by [checkForPrebuiltDatabase] when an update is available. */
     data class PrebuiltDatabaseInfo(
         val version: String,
-        val downloadUrl: String,
+        /** Streaming JSONL download URL (preferred — no temp file needed on device). */
+        val jsonlDownloadUrl: String,
         val fileSizeBytes: Long,
         val productCount: Int
     )
@@ -1442,13 +1441,13 @@ class FoodDatabaseManager(
                 val body = conn.inputStream.bufferedReader().readText()
                 conn.disconnect()
 
-                val json        = org.json.JSONObject(body)
-                val remoteVer   = json.optString("version", "none")
-                val downloadUrl = json.optString("download_url", "")
-                val fileSize    = json.optLong("file_size_bytes", 0L)
-                val count       = json.optInt("product_count", 0)
+                val json           = org.json.JSONObject(body)
+                val remoteVer      = json.optString("version", "none")
+                val jsonlUrl       = json.optString("jsonl_download_url", "")
+                val fileSize       = json.optLong("jsonl_file_size_bytes", 0L)
+                val count          = json.optInt("product_count", 0)
 
-                if (downloadUrl.isBlank() || downloadUrl.contains("PLACEHOLDER")) {
+                if (jsonlUrl.isBlank() || jsonlUrl.contains("PLACEHOLDER")) {
                     Log.d("FoodDatabaseManager", "No pre-built database published yet")
                     return@withContext null
                 }
@@ -1461,7 +1460,7 @@ class FoodDatabaseManager(
                 }
 
                 Log.d("FoodDatabaseManager", "Pre-built DB update: $installed → $remoteVer")
-                PrebuiltDatabaseInfo(remoteVer, downloadUrl, fileSize, count)
+                PrebuiltDatabaseInfo(remoteVer, jsonlUrl, fileSize, count)
             } catch (e: Exception) {
                 Log.w("FoodDatabaseManager", "Version check failed: ${e.message}")
                 null
@@ -1469,13 +1468,14 @@ class FoodDatabaseManager(
         }
 
     /**
-     * Downloads the pre-built database .gz from [info.downloadUrl], decompresses it,
-     * and imports all rows into Room in batches. Progress is reported via [downloadProgress].
+     * Streams the pre-built JSONL database directly from [info.jsonlDownloadUrl].
+     *
+     * The download is piped through a GZIPInputStream and parsed line-by-line —
+     * no temp files are written to the device, so this works even when internal
+     * storage is nearly full. Progress is reported via [downloadProgress].
      */
     suspend fun downloadPrebuiltDatabase(info: PrebuiltDatabaseInfo): Result<Unit> =
         withContext(Dispatchers.IO) {
-            val gzFile = File(context.cacheDir, "offs_prebuilt.db.gz")
-            val dbFile = File(context.cacheDir, "offs_prebuilt.db")
             try {
                 _downloadProgress.value = DownloadProgress(
                     currentDatabase  = "openfoodfacts",
@@ -1484,118 +1484,71 @@ class FoodDatabaseManager(
                     isDownloading    = true
                 )
 
-                // ── 1. Download .gz ────────────────────────────────────────────
-                val conn = java.net.URL(info.downloadUrl).openConnection() as HttpURLConnection
+                // ── Stream HTTP → GZIP → JSONL lines → Room (no temp files) ───
+                val conn = java.net.URL(info.jsonlDownloadUrl).openConnection() as HttpURLConnection
                 conn.connectTimeout = 30_000
-                conn.readTimeout    = 300_000
+                conn.readTimeout    = 600_000  // 10 min — streaming 1M rows takes time
                 conn.setRequestProperty("User-Agent", "CalorieTrackerApp/3.1 (Android)")
                 if (conn.responseCode != 200) {
                     return@withContext Result.failure(
                         Exception("Server returned HTTP ${conn.responseCode}")
                     )
                 }
-                val totalBytes = info.fileSizeBytes.takeIf { it > 0 } ?: conn.contentLengthLong
-                var receivedBytes = 0L
 
-                FileOutputStream(gzFile).use { out ->
-                    conn.inputStream.use { input ->
-                        val buf = ByteArray(65536)
-                        var n: Int
-                        while (input.read(buf).also { n = it } != -1) {
-                            out.write(buf, 0, n)
-                            receivedBytes += n
-                            if (totalBytes > 0) {
-                                val mb      = receivedBytes / 1_048_576
-                                val totalMb = totalBytes  / 1_048_576
-                                _downloadProgress.value = _downloadProgress.value.copy(
-                                    currentOperation = "Downloading... ${mb} MB / ${totalMb} MB",
-                                    downloadedItems  = (receivedBytes * 100 / totalBytes).toInt()
-                                )
-                            }
+                var imported = 0
+                val batch    = mutableListOf<OpenFoodFactsItem>()
+                val now      = System.currentTimeMillis()
+
+                GZIPInputStream(conn.inputStream).bufferedReader(Charsets.UTF_8).use { reader ->
+                    // Use a manual while loop so suspend DAO calls work inside the loop body.
+                    var line = reader.readLine()
+                    while (line != null) {
+                        if (line.isNotBlank()) {
+                            try {
+                                val j    = org.json.JSONObject(line)
+                                val id   = j.optString("id").takeIf { it.isNotBlank() }
+                                val name = j.optString("productName").takeIf { it.isNotBlank() }
+                                if (id != null && name != null) {
+                                    fun dbl(k: String) = if (j.isNull(k)) null else j.optDouble(k, Double.NaN).takeUnless { it.isNaN() }
+                                    fun str(k: String) = j.optString(k).takeIf { it.isNotBlank() }
+                                    fun int(k: String) = if (j.isNull(k)) null else j.optInt(k, Int.MIN_VALUE).takeUnless { it == Int.MIN_VALUE }
+                                    batch.add(OpenFoodFactsItem(
+                                        id = id, barcode = str("barcode") ?: id, productName = name,
+                                        brands = str("brands"), categories = str("categories"),
+                                        labels = str("labels"), countries = str("countries"),
+                                        ingredients = str("ingredients"), allergens = str("allergens"),
+                                        servingSize = str("servingSize"), servingQuantity = dbl("servingQuantity"),
+                                        energyKj = dbl("energyKj"), energyKcal = dbl("energyKcal"),
+                                        fat = dbl("fat"), saturatedFat = dbl("saturatedFat"),
+                                        carbohydrates = dbl("carbohydrates"), sugars = dbl("sugars"),
+                                        fiber = dbl("fiber"), proteins = dbl("proteins"),
+                                        salt = dbl("salt"), sodium = dbl("sodium"),
+                                        imageUrl = str("imageUrl"), productUrl = str("productUrl"),
+                                        nutritionGrade = str("nutritionGrade"), novaGroup = int("novaGroup"),
+                                        completeness = dbl("completeness"), lastUpdated = now
+                                    ))
+                                    if (batch.size >= 500) {
+                                        database.openFoodFactsDao().insertFoods(batch)
+                                        imported += batch.size; batch.clear()
+                                        if (imported % 50_000 == 0) {
+                                            _downloadProgress.value = _downloadProgress.value.copy(
+                                                currentOperation = "Importing... %,d products".format(imported),
+                                                downloadedItems  = imported
+                                            )
+                                        }
+                                    }
+                                }
+                            } catch (_: Exception) { /* skip malformed lines */ }
                         }
+                        line = reader.readLine()
                     }
                 }
                 conn.disconnect()
-                Log.d("FoodDatabaseManager", "Download complete: ${receivedBytes / 1_048_576} MB")
 
-                // ── 2. Decompress ──────────────────────────────────────────────
-                _downloadProgress.value = _downloadProgress.value.copy(
-                    currentOperation = "Decompressing..."
-                )
-                GZIPInputStream(FileInputStream(gzFile)).use { gz ->
-                    FileOutputStream(dbFile).use { out -> gz.copyTo(out, bufferSize = 65536) }
+                if (batch.isNotEmpty()) {
+                    database.openFoodFactsDao().insertFoods(batch)
+                    imported += batch.size
                 }
-                gzFile.delete()
-
-                // ── 3. Import rows from temp SQLite into Room ──────────────────
-                _downloadProgress.value = _downloadProgress.value.copy(
-                    currentOperation = "Importing products...",
-                    downloadedItems  = 0
-                )
-                var imported = 0
-                val batch = mutableListOf<OpenFoodFactsItem>()
-
-                val tempDb = android.database.sqlite.SQLiteDatabase.openDatabase(
-                    dbFile.absolutePath, null,
-                    android.database.sqlite.SQLiteDatabase.OPEN_READONLY
-                )
-                val cursor = tempDb.query("openfoodfacts_items", null, null, null, null, null, null)
-                try {
-                    fun col(name: String) = cursor.getColumnIndex(name)
-                    val cId     = col("id");          val cBarcode = col("barcode")
-                    val cName   = col("productName"); val cBrands  = col("brands")
-                    val cCats   = col("categories");  val cLabels  = col("labels")
-                    val cCntry  = col("countries");   val cIngr    = col("ingredients")
-                    val cAlrg   = col("allergens");   val cSrvSz   = col("servingSize")
-                    val cSrvQt  = col("servingQuantity")
-                    val cEKj    = col("energyKj");    val cEKcal   = col("energyKcal")
-                    val cFat    = col("fat");         val cSatFat  = col("saturatedFat")
-                    val cCarbs  = col("carbohydrates"); val cSugars = col("sugars")
-                    val cFiber  = col("fiber");       val cProt    = col("proteins")
-                    val cSalt   = col("salt");        val cSodium  = col("sodium")
-                    val cImgUrl = col("imageUrl");    val cProdUrl = col("productUrl")
-                    val cGrade  = col("nutritionGrade"); val cNova  = col("novaGroup")
-                    val cCompl  = col("completeness")
-
-                    fun dbl(c: Int) = if (c >= 0 && !cursor.isNull(c)) cursor.getDouble(c) else null
-                    fun str(c: Int) = if (c >= 0) cursor.getString(c) else null
-                    fun int(c: Int) = if (c >= 0 && !cursor.isNull(c)) cursor.getInt(c) else null
-
-                    while (cursor.moveToNext()) {
-                        val id   = str(cId)   ?: continue
-                        val name = str(cName) ?: continue
-                        batch.add(OpenFoodFactsItem(
-                            id = id, barcode = str(cBarcode) ?: id, productName = name,
-                            brands = str(cBrands), categories = str(cCats), labels = str(cLabels),
-                            countries = str(cCntry), ingredients = str(cIngr), allergens = str(cAlrg),
-                            servingSize = str(cSrvSz), servingQuantity = dbl(cSrvQt),
-                            energyKj = dbl(cEKj), energyKcal = dbl(cEKcal),
-                            fat = dbl(cFat), saturatedFat = dbl(cSatFat),
-                            carbohydrates = dbl(cCarbs), sugars = dbl(cSugars),
-                            fiber = dbl(cFiber), proteins = dbl(cProt),
-                            salt = dbl(cSalt), sodium = dbl(cSodium),
-                            imageUrl = str(cImgUrl), productUrl = str(cProdUrl),
-                            nutritionGrade = str(cGrade), novaGroup = int(cNova),
-                            completeness = dbl(cCompl), lastUpdated = System.currentTimeMillis()
-                        ))
-                        if (batch.size >= 500) {
-                            database.openFoodFactsDao().insertFoods(batch)
-                            imported += batch.size; batch.clear()
-                            _downloadProgress.value = _downloadProgress.value.copy(
-                                currentOperation = "Importing... %,d products".format(imported),
-                                downloadedItems  = imported
-                            )
-                        }
-                    }
-                    if (batch.isNotEmpty()) {
-                        database.openFoodFactsDao().insertFoods(batch)
-                        imported += batch.size; batch.clear()
-                    }
-                } finally {
-                    cursor.close()
-                    tempDb.close()
-                }
-                dbFile.delete()
                 Log.d("FoodDatabaseManager", "Prebuilt import complete: $imported products")
 
                 // ── 4. Persist status & version ────────────────────────────────
@@ -1625,7 +1578,6 @@ class FoodDatabaseManager(
                 throw e
             } catch (e: Exception) {
                 Log.e("FoodDatabaseManager", "Prebuilt DB download failed", e)
-                gzFile.delete(); dbFile.delete()
                 _downloadProgress.value = _downloadProgress.value.copy(
                     isDownloading = false,
                     error         = "Download failed: ${e.message}"

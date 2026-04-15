@@ -38,6 +38,8 @@ BATCH_SIZE = 1000       # Rows inserted per SQLite transaction
 LOG_INTERVAL = 50_000   # Print progress every N products scanned
 COMPRESS_LEVEL = 6      # gzip compression level (1=fast, 9=smallest)
 
+JSONL_GZ_FILE = OUTPUT_DIR / "openfoodfacts.jsonl.gz"
+
 # Minimum barcode length (UPC-A=12, EAN-13=13, allow shorter for some markets)
 MIN_BARCODE_LEN = 8
 
@@ -292,31 +294,40 @@ def main():
     print(f"   Products : {total_inserted:,}")
     print(f"   SQLite   : {db_size_mb:.1f} MB")
 
-    # Compress
-    print("\nCompressing database...")
-    with open(DB_FILE, "rb") as f_in, gzip.open(DB_GZ_FILE, "wb", compresslevel=COMPRESS_LEVEL) as f_out:
-        while chunk := f_in.read(131072):
-            f_out.write(chunk)
+    # ── Export JSONL ────────────────────────────────────────────────────────────
+    # The app streams this file directly from the HTTP response — no temp files
+    # needed on the device, which avoids running out of storage during import.
+    print("\nExporting JSONL...")
+    conn2 = sqlite3.connect(str(DB_FILE))
+    cols = [d[0] for d in conn2.execute("SELECT * FROM openfoodfacts_items LIMIT 0").description]
+    jsonl_rows = 0
+    with gzip.open(JSONL_GZ_FILE, "wt", encoding="utf-8", compresslevel=COMPRESS_LEVEL) as jf:
+        for row in conn2.execute("SELECT * FROM openfoodfacts_items"):
+            jf.write(json.dumps(dict(zip(cols, row)), ensure_ascii=False) + "\n")
+            jsonl_rows += 1
+            if jsonl_rows % 100_000 == 0:
+                print(f"  Exported {jsonl_rows:,} rows...")
+    conn2.close()
 
-    gz_size_mb = DB_GZ_FILE.stat().st_size / 1024 / 1024
-    print(f"✅ Compressed: {db_size_mb:.1f} MB → {gz_size_mb:.1f} MB")
+    jsonl_gz_mb = JSONL_GZ_FILE.stat().st_size / 1024 / 1024
+    print(f"✅ JSONL exported: {jsonl_rows:,} rows, {jsonl_gz_mb:.1f} MB")
 
-    # Write version JSON (download_url filled in by CI after release is created)
+    # Write version JSON (download URLs filled in by CI after release is created)
     version = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     version_data = {
         "version": version,
         "build_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "download_url": "__PLACEHOLDER__",
-        "file_size_bytes": DB_GZ_FILE.stat().st_size,
+        "jsonl_download_url": "__PLACEHOLDER__",
+        "jsonl_file_size_bytes": JSONL_GZ_FILE.stat().st_size,
         "product_count": total_inserted,
     }
     with open(VERSION_FILE, "w") as f:
         json.dump(version_data, f, indent=2)
 
     print(f"\n📦 Output files:")
-    print(f"   {DB_GZ_FILE}   ({gz_size_mb:.1f} MB)")
+    print(f"   {JSONL_GZ_FILE}   ({jsonl_gz_mb:.1f} MB)")
     print(f"   {VERSION_FILE}")
-    print("\nNext step: upload openfoodfacts.db.gz to a GitHub Release,")
+    print("\nNext step: upload openfoodfacts.jsonl.gz to a GitHub Release,")
     print("then update database_version.json with the download URL.")
 
 

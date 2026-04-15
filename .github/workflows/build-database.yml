@@ -82,7 +82,7 @@ jobs:
         run: |
           VERSION=$(python -c "import json; d=json.load(open('output/database_version.json')); print(d['version'])")
           COUNT=$(python -c "import json; d=json.load(open('output/database_version.json')); print(d['product_count'])")
-          SIZE_MB=$(python -c "import json; d=json.load(open('output/database_version.json')); print(round(d['file_size_bytes']/1024/1024,1))")
+          SIZE_MB=$(python -c "import json; d=json.load(open('output/database_version.json')); print(round(d['jsonl_file_size_bytes']/1024/1024,1))")
           echo "version=$VERSION"   >> $GITHUB_OUTPUT
           echo "count=$COUNT"       >> $GITHUB_OUTPUT
           echo "size_mb=$SIZE_MB"   >> $GITHUB_OUTPUT
@@ -105,7 +105,7 @@ jobs:
 
             ### How to update in the app
             Go to **Settings → Regional → Download Food Database** and tap **"Check for update"**.
-          files: output/openfoodfacts.db.gz
+          files: output/openfoodfacts.jsonl.gz
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -113,19 +113,18 @@ jobs:
       # ── Update version JSON with real download URL ─────────────────────
       - name: Update database_version.json
         run: |
-          ASSET_URL="https://github.com/${{ github.repository }}/releases/download/db-${{ steps.meta.outputs.version }}/openfoodfacts.db.gz"
           python - <<'EOF'
-          import json, os, sys
-          asset_url = os.environ["ASSET_URL"]
+          import json, os
+          jsonl_url = os.environ["JSONL_URL"]
           with open("output/database_version.json") as f:
               d = json.load(f)
-          d["download_url"] = asset_url
+          d["jsonl_download_url"] = jsonl_url
           with open("database_version.json", "w") as f:
               json.dump(d, f, indent=2)
-          print(f"Updated download_url to: {asset_url}")
+          print(f"Updated jsonl_download_url to: {jsonl_url}")
           EOF
         env:
-          ASSET_URL: "https://github.com/${{ github.repository }}/releases/download/db-${{ steps.meta.outputs.version }}/openfoodfacts.db.gz"
+          JSONL_URL: "https://github.com/${{ github.repository }}/releases/download/db-${{ steps.meta.outputs.version }}/openfoodfacts.jsonl.gz"
 
       # ── Commit updated version JSON back to main ───────────────────────
       - name: Commit version JSON
