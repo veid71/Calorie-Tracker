@@ -302,7 +302,7 @@ def main():
     print(f"✅ Compressed: {db_size_mb:.1f} MB → {gz_size_mb:.1f} MB")
 
     # Write version JSON (download_url filled in by CI after release is created)
-    version = datetime.now(timezone.utc).strftime("%Y-%m")
+    version = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     version_data = {
         "version": version,
         "build_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
