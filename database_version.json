@@ -1,7 +1,7 @@
 {
-  "version": "2026-08-01",
-  "build_date": "2026-08-01",
-  "jsonl_download_url": "https://github.com/veid71/Calorie-Tracker/releases/download/db-2026-08-01/openfoodfacts.jsonl.gz",
-  "jsonl_file_size_bytes": 115446940,
-  "product_count": 1004885
+  "version": "2026-09-01",
+  "build_date": "2026-09-01",
+  "jsonl_download_url": "https://github.com/veid71/Calorie-Tracker/releases/download/db-2026-09-01/openfoodfacts.jsonl.gz",
+  "jsonl_file_size_bytes": 113878006,
+  "product_count": 993215
 }
